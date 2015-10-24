@@ -108,8 +108,9 @@ class Game(object):
         should_quit = False
         while not should_quit:
             if not self.game_won:
-                self._has_won()
                 self.draw()
+                self._has_won()
+
             # get input
             c = self.screen.getch()
             if c == ord('q'):
@@ -122,10 +123,16 @@ class Game(object):
 
             # selection
             elif c == curses.KEY_LEFT:
-                self.selection.x = self.selection.x - 1 if self.selection.x > 0 else 6
+                while True:
+                    self.selection.x = self.selection.x - 1 if self.selection.x > 0 else 6
+                    if len(self.tableau[self.selection.x]) > 0:
+                        break
                 self._update_selection_y()
             elif c == curses.KEY_RIGHT:
-                self.selection.x = self.selection.x + 1 if self.selection.x < 6 else 0
+                while True:
+                    self.selection.x = self.selection.x + 1 if self.selection.x < 6 else 0
+                    if len(self.tableau[self.selection.x]) > 0:
+                        break
                 self._update_selection_y()
             elif c == curses.KEY_UP:
                 pile = self.tableau[self.selection.x]
@@ -252,11 +259,7 @@ class Game(object):
         self.screen.attron(curses.color_pair(1))
 
     def _update_selection_y(self):
-        pile = self.tableau[self.selection.x]
-        for card in pile:
-            if card.face_up:
-                self.selection.y = pile.index(card)
-                break
+        self.selection.y = len(self.tableau[self.selection.x]) - 1
 
     def _move_to_pile(self, n):
         n -= 1
@@ -312,7 +315,8 @@ class Game(object):
             except IndexError:
                 return
         else:
-            if self.selection.y != len(self.tableau[self.selection.x]) - 1:  # make sure we are selecting the bottom card
+            # make sure we are selecting the bottom card
+            if self.selection.y != len(self.tableau[self.selection.x]) - 1:
                 return
             card = self.tableau[self.selection.x][self.selection.y]
 
